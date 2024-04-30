@@ -31,7 +31,7 @@ print(f"Connected to {hostname} successfully!")
 
 # extract data
 query = """SELECT * FROM animes"""
-local_filename = 'animes_extract.csv'
+local_filename = 'data/animes_extract.csv'
 
 try:
     with conn.cursor() as cursor:
