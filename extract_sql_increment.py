@@ -1,4 +1,5 @@
 import csv
+from typing import List, Optional, Tuple
 import boto3
 import psycopg2
 import pymysql
@@ -29,7 +30,7 @@ client = boto3.client(
 )
 
 
-def connect_to_aws_redshift():
+def connect_to_aws_redshift() -> psycopg2.extensions.connection:
     """Handles connection to AWS Redshift cluster"""
     try:
         # connect to the RS dwh cluster
@@ -50,7 +51,7 @@ def connect_to_aws_redshift():
         print(f"Connection failed, details of the error: {e}")
         return None
     
-def execute_query(conn, query, fetch_mode=None):
+def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=None) -> Optional[List[Tuple]]:
     """Executes the query and returns the result
     Args:
         conn: connection object
@@ -78,7 +79,7 @@ def execute_query(conn, query, fetch_mode=None):
         sys.exit(1)
 
 
-def create_table_animes(conn):
+def create_table_animes(conn: psycopg2.extensions.connection) -> None:
     """ Creates the table if it doesn't exist already
     Args:
         conn: connection object
