@@ -1,54 +1,77 @@
-import pymysql
 import csv
 import boto3
-import configparser
+import psycopg2
+import pymysql
 import sys, os, logging
 import credentials
 
-my_config = credentials.read_config('pipeline.conf', 'mysql_config',
-                                    ['hostname', 'port', 'username', 'database', 'password'])
+my_config = credentials.read_config('pipeline.conf', 'aws_creds',
+                                    ['database', 'username', 'hostname',
+                                      'port', 'access_key', 'secret_key', 'region',
+                                      'password'])
 
 # database variables
 
-hostname = my_config[0]
-port = int(my_config[1])
-username = my_config[2]
-dbname = my_config[3]
-password = credentials.decode_string(my_config[4]) # this one is b64
+dbname = my_config[0]
+username = my_config[1]
+hostname = my_config[2]
+port = int(my_config[3])
+access_key, secret_key = credentials.decode_credentials(my_config[4], my_config[5])
+region = my_config[6]
+password = credentials.decode_string(my_config[7])
 
-# connection to the db
+# Create a RedShift Client
+client = boto3.client(
+    'redshift-serverless',
+    region_name=region,
+    aws_access_key_id=access_key,
+    aws_secret_access_key=secret_key
+)
 
-conn = pymysql.connect(host=hostname,
-                       user=username,
-                       password=password,
-                       db=dbname,
-                       port=port)
+
+def connect_to_aws_redshift():
+
+    try:
+        # connect to the RS dwh cluster
+        conn = psycopg2.connect(
+            host=hostname,
+            dbname=dbname,
+            user=username,
+            password=password,
+            port=port
+        )
+        return conn
+    except Exception as e:
+        print(f"Connection failed, details of the error: {e}")
+        return None
+    
+# execute connection and terminate if it fails
+conn = connect_to_aws_redshift()
 
 if conn is None:
     print('Connection failed')
     sys.exit(1)
 print(f"Connected to {hostname} successfully!")
 
-# extract data
-query = """SELECT * FROM animes"""
-local_filename = 'data/animes_extract.csv'
 
+# define query
+query = """SELECT COALESCE(MAX(LastUpdated), '1900-01-01') 
+            FROM animes;"""
+# execute query
 try:
     with conn.cursor() as cursor:
         cursor.execute(query)
-        results = cursor.fetchall()
+        result = cursor.fetchone()
+        print(result[0])
 except Exception as e:
     print(f"Error during extraction: {e}")
     sys.exit(1)
 
-# write to csv
-try:
-    with open(local_filename, 'w', newline='') as f:
-        writer = csv.writer(f, delimiter='|')
-        writer.writerows(results)
-        
-    print('Saved data to local CSV file successfully!')
-except Exception as e:
-    print(f"Error during saving local file: {e}")
-    sys.exit(1)
+conn.commit()
+
+# close connection
+conn.close()
+
+
+
 
