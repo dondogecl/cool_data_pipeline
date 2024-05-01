@@ -40,38 +40,82 @@ def connect_to_aws_redshift():
             password=password,
             port=port
         )
+
+        if conn is None:
+            print('Connection failed')
+            sys.exit(1)
+        print(f"Connected to {hostname} successfully!")
         return conn
     except Exception as e:
         print(f"Connection failed, details of the error: {e}")
         return None
     
-# execute connection and terminate if it fails
-conn = connect_to_aws_redshift()
+def execute_query(conn, query, fetch_mode=None):
+    # execute query
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            # fetch results (if asked)
+            if fetch_mode == 'one':
+              result = cursor.fetchone()
+            elif fetch_mode == 'all':
+              result = cursor.fetchall()
+            else:
+              result = None
+            conn.commit()
+            print(f'Query {query} executed successfully')
+            return result
+    except Exception as e:
+        print(f"Error during extraction: {e}")
+        sys.exit(1)
 
-if conn is None:
-    print('Connection failed')
-    sys.exit(1)
-print(f"Connected to {hostname} successfully!")
 
-
-# define query
-query = """SELECT COALESCE(MAX(LastUpdated), '1900-01-01') 
+def create_table_animes(conn):
+    """ Creates the table if it doesn't exist already"""
+    ddl_query = """
+                CREATE TABLE IF NOT EXISTS animes (
+                anime_id INT,
+                name VARCHAR(300),
+                genre VARCHAR(300),
+                type VARCHAR(300),
+                episodes INT,
+                rating DOUBLE PRECISION,
+                members INT,
+                last_updated TIMESTAMP
+                );
+                """
+    res = execute_query(conn, ddl_query, None)
+    if res is None:
+        print('Table created successfully/already exists')
+        return
+    else:
+        print(f"Error in creating table animes")
+    
+def get_latest_updated_rs(conn):
+    """Returns the latest updated date in the RS cluster"""
+    # define query
+    query = """SELECT COALESCE(MAX(last_updated), '1900-01-01') 
             FROM animes;"""
-# execute query
-try:
-    with conn.cursor() as cursor:
-        cursor.execute(query)
-        result = cursor.fetchone()
-        print(result[0])
-except Exception as e:
-    print(f"Error during extraction: {e}")
-    sys.exit(1)
-
-conn.commit()
-
-# close connection
-conn.close()
+    # fetch result
+    res = execute_query(conn, query, 'one')
+    return res
 
 
+def main():
+    # execute connection and terminate if it fails
+    conn = connect_to_aws_redshift()
 
+    create_table_animes(conn)
 
+    latest_update_rs = get_latest_updated_rs(conn)
+
+    if latest_update_rs is not None:
+        print(f"Last update: {latest_update_rs}")
+    else:
+        print("Failed to get last update")
+
+    # close connection
+    conn.close()
+
+if __name__ == "__main__":
+    main()
