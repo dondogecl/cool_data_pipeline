@@ -30,7 +30,7 @@ client = boto3.client(
 
 
 def connect_to_aws_redshift():
-
+    """Handles connection to AWS Redshift cluster"""
     try:
         # connect to the RS dwh cluster
         conn = psycopg2.connect(
@@ -51,6 +51,14 @@ def connect_to_aws_redshift():
         return None
     
 def execute_query(conn, query, fetch_mode=None):
+    """Executes the query and returns the result
+    Args:
+        conn: connection object
+        query: query to be executed
+        fetch_mode: None, 'one', 'all'
+    Returns:
+        result: result of the query. None if fetch_mode is None, or one row if fetch_mode is 'one',
+          or all if fetch_mode is 'all'"""
     # execute query
     try:
         with conn.cursor() as cursor:
@@ -71,7 +79,13 @@ def execute_query(conn, query, fetch_mode=None):
 
 
 def create_table_animes(conn):
-    """ Creates the table if it doesn't exist already"""
+    """ Creates the table if it doesn't exist already
+    Args:
+        conn: connection object
+    Returns:
+        None
+    """
+    
     ddl_query = """
                 CREATE TABLE IF NOT EXISTS animes (
                 anime_id INT,
@@ -86,10 +100,10 @@ def create_table_animes(conn):
                 """
     res = execute_query(conn, ddl_query, None)
     if res is None:
-        print('Table created successfully/already exists')
+        print('Table animes created successfully/already exists')
         return
     else:
-        print(f"Error in creating table animes")
+        print(f"Error in creating/connecting to the table animes")
     
 def get_latest_updated_rs(conn):
     """Returns the latest updated date in the RS cluster"""
