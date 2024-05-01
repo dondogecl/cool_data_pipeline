@@ -8,6 +8,12 @@ def encode_credentials(access_key: str, secret_key: str) -> tuple[str, str]:
     encoded_secret_key = base64.b64encode(secret_key.encode('utf-8')).decode('utf-8')
     return encoded_access_key, encoded_secret_key
 
+def encode_string(plain_string: str) -> str:
+    """Decode a given string from base64 format"""
+    encoded_string = base64.b64encode(plain_string.encode('utf-8')).decode('utf-8')
+    
+    return encoded_string
+
 def decode_credentials(access_key_64: str, secret_key_64: str) -> tuple[str, str]:
     """Decode access_key and secret_key from base64 format"""
     access_key = base64.b64decode(access_key_64).decode('utf-8')
@@ -42,7 +48,3 @@ def read_config(filename: str, section:str, keys: list) -> list[str]:
     
     return list_of_outputs
 
-# aws_credentials = read_config('pipeline.conf', 'aws_boto_credentials', ['access_key', 'secret_key'])
-# mysql = read_config('pipeline.conf', 'mysql_config', ['password'])
-# encoded = encode_credentials(mysql[0], 'a')
-# print(encoded[0])
