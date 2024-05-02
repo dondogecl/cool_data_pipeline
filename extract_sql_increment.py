@@ -115,6 +115,29 @@ def get_latest_updated_rs(conn):
     res = execute_query(conn, query, 'one')
     return res
 
+def connect_to_mysql():
+    mysql_config = credentials.read_config('pipeline.conf', 'mysql_config',
+                                    ['hostname', 'port', 'username', 'database', 'password'])
+    hostname = mysql_config[0]
+    port = int(mysql_config[1])
+    username = mysql_config[2]
+    dbname = mysql_config[3]
+    password = credentials.decode_string(mysql_config[4])
+
+    conn = pymysql.connect(host=hostname,
+                           user=username,
+                           password=password,
+                           db=dbname,
+                           port=port)
+    
+    if conn is None:
+        print('Connection failed')
+        sys.exit(1)
+    else:
+        print(f"Connected to {hostname} successfully!")
+    return conn
+
+
 
 def main():
     # execute connection and terminate if it fails

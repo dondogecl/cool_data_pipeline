@@ -7,3 +7,17 @@ Initially the architecture will contemplate a mysql database, but it could be la
 The target storage will be in the AWS cloud, and some parts could change with time.
 
 This document will grow as new components get designed and included to the project.
+
+# Architecture
+
+# Installation
+
+# Data sources
+
+# Cloud setup
+
+# Deployment
+
+# Testing
+
+# License
