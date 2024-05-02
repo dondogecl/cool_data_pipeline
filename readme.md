@@ -10,6 +10,13 @@ This document will grow as new components get designed and included to the proje
 
 # Architecture
 
+                   Scheduler
+                      ↓
+   AniList API    ->   MySQL   ->  Extraction Job Python   ->    S3    ->   Redshift
+      ↓                          ↓                               ↓           ↓
+   Data Fetch              Data Storage                    Data Extraction   Data Loading
+
+
 # Installation
 
 # Data sources
