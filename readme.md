@@ -15,10 +15,11 @@ Finally, all the installation and deployment in the cloud will be done with IaC,
 
 # Architecture
 
-```
+```mermaid
+graph TD;
                    Scheduler
                       ↓
-   AniList API    ->   MySQL   ->  Extraction Job Python   ->    S3    ->   Redshift
+   AniList API    -->   MySQL   -->  Extraction Job Python   -->    S3    -->   Redshift
       ↓                          ↓                               ↓           ↓
    Data Fetch              Data Storage                    Data Extraction   Data Loading
 ```
