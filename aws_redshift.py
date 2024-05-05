@@ -45,6 +45,10 @@ def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=N
     Returns:
         result: result of the query. None if fetch_mode is None, or one row if fetch_mode is 'one',
           or all if fetch_mode is 'all'"""
+    # Check for null pointer references
+    if conn is None:
+        raise ValueError("Connection object is None")
+
     # execute query
     try:
         with conn.cursor() as cursor:
@@ -56,12 +60,14 @@ def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=N
               result = cursor.fetchall()
             else:
               result = None
+            cursor.close()
             conn.commit()
-            print(f'Query {query} executed successfully')
             return result
     except Exception as e:
+        # Log the error message
         print(f"Error during extraction: {e}")
-        sys.exit(1)
+        # Reraise the exception to exit the program
+        raise
 
 def get_latest_updated_rs(conn) -> tuple:
     """Returns the latest updated date in the RS cluster"""
