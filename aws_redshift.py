@@ -3,6 +3,7 @@ import configparser
 import psycopg2
 import sys
 from typing import List, Optional, Tuple
+import logging
 
 
 def boto_client(region, access_key, secret_key):
@@ -47,6 +48,7 @@ def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=N
           or all if fetch_mode is 'all'"""
     # Check for null pointer references
     if conn is None:
+        logging.error("Connection object is None")
         raise ValueError("Connection object is None")
 
     # execute query
@@ -56,16 +58,20 @@ def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=N
             # fetch results (if asked)
             if fetch_mode == 'one':
               result = cursor.fetchone()
+              conn.commit()
             elif fetch_mode == 'all':
               result = cursor.fetchall()
+              conn.commit()
             else:
               result = None
+              conn.commit()
             cursor.close()
-            conn.commit()
             return result
     except Exception as e:
         # Log the error message
         print(f"Error during extraction: {e}")
+        logging.error(f"Error during extraction: {e}")
+        conn.close()
         # Reraise the exception to exit the program
         raise
 

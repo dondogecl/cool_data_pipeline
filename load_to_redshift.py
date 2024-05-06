@@ -58,8 +58,9 @@ def main():
     data_file = 'animes_increment.csv'
     object_path = f"s3://{bucket_name}/{data_file}"
     role_string = f"arn:aws:iam::{account_id}:role/{iam_role}"
+    table_name = 'public.animes'
     query = f"""
-            COPY public.animes
+            COPY {table_name}
             FROM '{object_path}'
             iam_role '{role_string}'
             """
