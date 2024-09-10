@@ -66,7 +66,7 @@ def main():
             """
     # one line conditional to check if the function returns None then print "success"
     if aws_redshift.execute_query(conn, query, None) is None:
-        print("query executed")
+        logging.info("query executed")
     
 
     

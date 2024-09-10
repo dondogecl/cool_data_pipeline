@@ -15,7 +15,7 @@ def initialize_s3(access_key, secret_key):
                     aws_access_key_id=access_key, 
                     aws_secret_access_key=secret_key)
     except Exception as e:
-        print(f"Error during s3 initialization: {e}")
+        logging.error(f"Error during s3 initialization: {e}")
         sys.exit(1)
     return s3
 
@@ -38,10 +38,10 @@ class S3Client:
         """Uploads a file to an S3 bucket"""
         try:
             self.client.upload_file(local_filename, bucket_name, s3_filename)
-            print("Upload Successful")
+            logging.info("Upload Successful")
             return True
         except Exception as e:
-            print(f"Upload Failed, details: {e}")
+            logging.error(f"Upload Failed, details: {e}")
             return False
 
 

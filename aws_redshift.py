@@ -29,12 +29,12 @@ def connect_to_aws_redshift(hostname, dbname, username, password, port) -> psyco
         )
 
         if conn is None:
-            print('Connection failed')
+            logging.error('Connection failed')
             sys.exit(1)
-        print(f"Connected to {hostname} successfully!")
+        logging.info(f"Connected to {hostname} successfully!")
         return conn
     except Exception as e:
-        print(f"Connection failed, details of the error: {e}")
+        logging.error(f"Connection failed, details of the error: {e}")
         return None
 
 def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=None) -> Optional[List[Tuple]]:
@@ -69,7 +69,7 @@ def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=N
             return result
     except Exception as e:
         # Log the error message
-        print(f"Error during extraction: {e}")
+
         logging.error(f"Error during extraction: {e}")
         conn.close()
         # Reraise the exception to exit the program

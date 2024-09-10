@@ -25,9 +25,9 @@ conn = pymysql.connect(host=hostname,
                        port=port)
 
 if conn is None:
-    print('Connection failed')
+    logging.error('Connection failed')
     sys.exit(1)
-print(f"Connected to {hostname} successfully!")
+logging.info(f"Connected to {hostname} successfully!")
 
 # extract data
 query = """SELECT * FROM animes"""
@@ -38,7 +38,7 @@ try:
         cursor.execute(query)
         results = cursor.fetchall()
 except Exception as e:
-    print(f"Error during extraction: {e}")
+    logging.error(f"Error during extraction: {e}")
     sys.exit(1)
 
 # write to csv
@@ -47,8 +47,8 @@ try:
         writer = csv.writer(f, delimiter='|')
         writer.writerows(results)
         
-    print('Saved data to local CSV file successfully!')
+    logging.info('Saved data to local CSV file successfully!')
 except Exception as e:
-    print(f"Error during saving local file: {e}")
+    logging.error(f"Error during saving local file: {e}")
     sys.exit(1)
 

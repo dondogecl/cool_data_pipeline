@@ -43,12 +43,12 @@ def connect_to_aws_redshift() -> psycopg2.extensions.connection:
         )
 
         if conn is None:
-            print('Connection failed')
+            logging.error('Connection failed')
             sys.exit(1)
-        print(f"Connected to {hostname} successfully!")
+        logging.info(f"Connected to {hostname} successfully!")
         return conn
     except Exception as e:
-        print(f"Connection failed, details of the error: {e}")
+        logging.error(f"Connection failed, details of the error: {e}")
         return None
     
 def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=None) -> Optional[List[Tuple]]:
@@ -72,10 +72,10 @@ def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=N
             else:
               result = None
             conn.commit()
-            print(f'Query {query} executed successfully')
+            logging.info(f'Query {query} executed successfully')
             return result
     except Exception as e:
-        print(f"Error during extraction: {e}")
+        logging.error(f"Error during extraction: {e}")
         sys.exit(1)
 
 
@@ -101,10 +101,10 @@ def create_table_animes(conn: psycopg2.extensions.connection) -> None:
                 """
     res = execute_query(conn, ddl_query, None)
     if res is None:
-        print('Table animes created successfully/already exists')
+        logging.info('Table animes created successfully/already exists')
         return
     else:
-        print(f"Error in creating/connecting to the table animes")
+        logging.error(f"Error in creating/connecting to the table animes")
     
 def get_latest_updated_rs(conn) -> tuple:
     """Returns the latest updated date in the RS cluster"""
@@ -131,10 +131,10 @@ def connect_to_mysql():
                            port=port)
     
     if conn is None:
-        print('Connection failed')
+        logging.error(f'Connection to {hostname} failed')
         sys.exit(1)
     else:
-        print(f"Connected to {hostname} successfully!")
+        logging.info(f"Connected to {hostname} successfully!")
     return conn
 
 def save_to_csv(filename, results, path) -> str:
@@ -150,10 +150,10 @@ def save_to_csv(filename, results, path) -> str:
             writer = csv.writer(f, delimiter='|')
             writer.writerows(results)
             
-        print('Saved data to local CSV file successfully!')
+        logging.info('Saved data to local CSV file successfully!')
         return output
     except Exception as e:
-        print(f"Error during saving local file: {e}")
+        logging.error(f"Error during saving local file: {e}")
         sys.exit(1)
 
 def main():
@@ -163,9 +163,9 @@ def main():
     latest_update_rs = get_latest_updated_rs(conn)
 
     if latest_update_rs is not None:
-        print(f"Last update: {latest_update_rs[0][0]} (｡◕‿‿◕｡)")
+        logging.info(f"Last update: {latest_update_rs[0][0]} (｡◕‿‿◕｡)")
     else:
-        print("Failed to get last update (╥﹏╥)")
+        logging.error("Failed to get last update (╥﹏╥)")
 
     # close redshift connection
     conn.close()
@@ -193,7 +193,7 @@ def main():
                                      bucket)
 
     # Check upload status and print a message in a single line
-    print(f"File '{target_filename}' {'uploaded' if upload_status else 'failed to upload'} to S3 '{bucket}' successfully!")
+    logging.debug(f"File '{target_filename}' {'uploaded' if upload_status else 'failed to upload'} to S3 '{bucket}' successfully!")
 
 
 if __name__ == "__main__":
