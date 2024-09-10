@@ -43,8 +43,40 @@ Finally, all the installation and deployment in the cloud will be done with IaC,
 
 # Deployment
 
+Example for the environment variables needed to make the process work:
+
+```
+
+# [aws_boto_credentials]
+AWS_ACCESS_KEY=<my_key>
+AWS_SECRET_KEY=<my_secret>
+BUCKET_NAME=<my_bucket_name>
+AWS_ACCOUNT_ID=<my_account_id>
+
+# [mysql_config]
+MYSQL_HOSTNAME=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_USERNAME=<my_user>
+MYSQL_PASSWORD=<my_db_pass>
+MYSQL_DATABASE=<my_db_name>
+
+# [aws_creds]
+DWH_DATABASE=<my_db_name>
+DWH_USERNAME=<my_user>
+DWH_PASSWORD=<my_pass>
+DWH_HOSTNAME=<endpoint/workgroup_for_rs>
+DWH_PORT=5439
+DWH_IAM_ROLE=<RedshiftLoaderRoleExample>
+DWH_ACCESS_KEY=<example_access_key>
+DWH_SECRET_KEY=<example_secret_has_to_be_hard_to_guess>
+DWH_REGION=<us-east-2_for_example>
+
+```
+
 
 # Testing
 
+Create quality tests using pytest/dbt.
 
 # License
+
