@@ -4,6 +4,7 @@ import boto3
 import configparser
 import sys, os, logging
 import credentials
+import yaml
 
 my_config = credentials.read_config('pipeline.conf', 'mysql_config',
                                     ['hostname', 'port', 'username', 'database', 'password'])
@@ -30,7 +31,17 @@ if conn is None:
 logging.info(f"Connected to {hostname} successfully!")
 
 # extract data
-query = """SELECT * FROM animes"""
+query_file = 'queries.yml'
+try:
+    with open(query_file, 'r') as qf:
+        query_data = yaml.safe_load(qf)
+        query = query_data['queries']['extract_anime']
+    logging.info('Successfully read queries file.')
+except Exception as e:
+    logging.error(f"Error reading the query file, details: {e}")
+    sys.exit(1)
+
+# csv file location
 local_filename = 'data/animes_extract.csv'
 
 try:
