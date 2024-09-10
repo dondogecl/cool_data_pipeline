@@ -1,6 +1,7 @@
 import base64
 import os
 import configparser
+import logging
 
 def encode_credentials(access_key: str, secret_key: str) -> tuple[str, str]:
     """Encode access_key and secret_key into base64 format"""
@@ -33,6 +34,7 @@ def read_config(filename: str, section:str, keys: list) -> list[str]:
     config = configparser.ConfigParser(interpolation=None)
     # read the configuration file (if found)
     if not os.path.isfile(filename):
+        logging.error('Config file not found')
         raise FileNotFoundError(f'Config file not found: {filename}') 
 
     config.read(filename)
@@ -44,6 +46,7 @@ def read_config(filename: str, section:str, keys: list) -> list[str]:
             value = config[section][k]
             list_of_outputs.append(value)
         except KeyError:
+            logging.error(f'Key {k} not found in section {section}')
             raise KeyError(f'Key {k} not found in section {section}')
     
     return list_of_outputs

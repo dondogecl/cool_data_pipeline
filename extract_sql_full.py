@@ -4,6 +4,7 @@ import boto3
 import configparser
 import sys, os, logging
 import credentials
+import yaml
 
 my_config = credentials.read_config('pipeline.conf', 'mysql_config',
                                     ['hostname', 'port', 'username', 'database', 'password'])
@@ -25,12 +26,22 @@ conn = pymysql.connect(host=hostname,
                        port=port)
 
 if conn is None:
-    print('Connection failed')
+    logging.error('Connection failed')
     sys.exit(1)
-print(f"Connected to {hostname} successfully!")
+logging.info(f"Connected to {hostname} successfully!")
 
 # extract data
-query = """SELECT * FROM animes"""
+query_file = 'queries.yml'
+try:
+    with open(query_file, 'r') as qf:
+        query_data = yaml.safe_load(qf)
+        query = query_data['queries']['extract_anime']
+    logging.info('Successfully read queries file.')
+except Exception as e:
+    logging.error(f"Error reading the query file, details: {e}")
+    sys.exit(1)
+
+# csv file location
 local_filename = 'data/animes_extract.csv'
 
 try:
@@ -38,7 +49,7 @@ try:
         cursor.execute(query)
         results = cursor.fetchall()
 except Exception as e:
-    print(f"Error during extraction: {e}")
+    logging.error(f"Error during extraction: {e}")
     sys.exit(1)
 
 # write to csv
@@ -47,8 +58,8 @@ try:
         writer = csv.writer(f, delimiter='|')
         writer.writerows(results)
         
-    print('Saved data to local CSV file successfully!')
+    logging.info('Saved data to local CSV file successfully!')
 except Exception as e:
-    print(f"Error during saving local file: {e}")
+    logging.error(f"Error during saving local file: {e}")
     sys.exit(1)
 

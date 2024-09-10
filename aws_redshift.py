@@ -3,6 +3,7 @@ import configparser
 import psycopg2
 import sys
 from typing import List, Optional, Tuple
+import logging
 
 
 def boto_client(region, access_key, secret_key):
@@ -28,12 +29,12 @@ def connect_to_aws_redshift(hostname, dbname, username, password, port) -> psyco
         )
 
         if conn is None:
-            print('Connection failed')
+            logging.error('Connection failed')
             sys.exit(1)
-        print(f"Connected to {hostname} successfully!")
+        logging.info(f"Connected to {hostname} successfully!")
         return conn
     except Exception as e:
-        print(f"Connection failed, details of the error: {e}")
+        logging.error(f"Connection failed, details of the error: {e}")
         return None
 
 def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=None) -> Optional[List[Tuple]]:
@@ -47,6 +48,7 @@ def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=N
           or all if fetch_mode is 'all'"""
     # Check for null pointer references
     if conn is None:
+        logging.error("Connection object is None")
         raise ValueError("Connection object is None")
 
     # execute query
@@ -56,16 +58,20 @@ def execute_query(conn: psycopg2.extensions.connection, query: str, fetch_mode=N
             # fetch results (if asked)
             if fetch_mode == 'one':
               result = cursor.fetchone()
+              conn.commit()
             elif fetch_mode == 'all':
               result = cursor.fetchall()
+              conn.commit()
             else:
               result = None
+              conn.commit()
             cursor.close()
-            conn.commit()
             return result
     except Exception as e:
         # Log the error message
-        print(f"Error during extraction: {e}")
+
+        logging.error(f"Error during extraction: {e}")
+        conn.close()
         # Reraise the exception to exit the program
         raise
 

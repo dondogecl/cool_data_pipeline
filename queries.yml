@@ -1,0 +1,2 @@
+queries:
+  extract_anime: "SELECT * FROM animes;"
